@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D365 Connector - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background 0.3s;
+        }
+
+        .login-btn:hover {
+            background: #0060a9;
+        }
+
+        .token-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .token-section.active {
+            display: block;
+        }
+
+        .user-info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .user-info label {
+            color: #666;
+            font-size: 12px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .user-info p {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .token-display {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 12px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .token-display label {
+            color: #666;
+            font-size: 12px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .token-text {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            max-height: 100px;
+            overflow-y: auto;
+            color: #333;
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 8px;
+            margin-top: 8px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 10px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #5a6268;
+        }
+
+        .test-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .test-section.active {
+            display: block;
+        }
+
+        .test-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .test-btn {
+            width: 100%;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .test-btn:hover {
+            background: #5568d3;
+        }
+
+        .response {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 12px;
+            margin-top: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #333;
+        }
+
+        .success {
+            color: #28a745;
+        }
+
+        .error {
+            color: #dc3545;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: white;
+            animation: pulse 1.5s infinite;
+            margin-right: 5px;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loadtest-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .loadtest-section.active {
+            display: block;
+        }
+
+        .loadtest-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+
+        .loadtest-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .loadtest-btn {
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .loadtest-btn:hover {
+            background: #5568d3;
+        }
+
+        .loadtest-btn.secondary {
+            background: #6c757d;
+        }
+
+        .loadtest-btn.secondary:hover {
+            background: #5a6268;
+        }
+
+        .loadtest-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loadtest-result {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #333;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .result-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .result-tab-btn {
+            padding: 10px 15px;
+            background: transparent;
+            color: #666;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .result-tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .result-tab-btn:hover {
+            color: #667eea;
+        }
+
+        .result-tab-content {
+            display: none;
+        }
+
+        .result-tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            color: #333;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .stat-unit {
+            color: #999;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        .export-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .export-btn {
+            padding: 8px 12px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+        }
+
+        .export-btn.copy {
+            background: #0078d4;
+        }
+
+        .export-btn.copy:hover {
+            background: #0060a9;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .result-table thead {
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .result-table th {
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .result-table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .request-log {
+            margin-top: 20px;
+        }
+
+        .request-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .request-log-header h4 {
+            margin: 0;
+            color: #333;
+        }
+
+        .log-filter {
+            display: flex;
+            gap: 10px;
+        }
+
+        .log-filter button {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .log-filter button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .request-row {
+            display: flex;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            gap: 15px;
+            align-items: center;
+            background: white;
+        }
+
+        .request-row:hover {
+            background: #f9f9f9;
+        }
+
+        .request-row.failed {
+            border-left: 3px solid #dc3545;
+        }
+
+        .request-row.success {
+            border-left: 3px solid #28a745;
+        }
+
+        .request-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .request-col-label {
+            color: #999;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .request-col-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .request-status {
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .request-status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .request-status.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .request-log-scroll {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            background: #fafafa;
+        }
+
+        .log-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .log-summary-item {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+
+        .log-summary-item-label {
+            color: #999;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .log-summary-item-value {
+            color: #333;
+            font-weight: 600;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>D365 Connector</h1>
+        <p class="subtitle">Login with your Microsoft Account</p>
+
+        <!-- Login Section -->
+        <div id="loginSection">
+            <button class="login-btn" onclick="loginWithMicrosoft()">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <rect width="8" height="8" fill="currentColor" />
+                    <rect x="11" width="8" height="8" fill="currentColor" />
+                    <rect y="11" width="8" height="8" fill="currentColor" />
+                    <rect x="11" y="11" width="8" height="8" fill="currentColor" />
+                </svg>
+                Login with Microsoft
+            </button>
+        </div>
+
+        <!-- Token Section -->
+        <div id="tokenSection" class="token-section">
+            <div class="user-info">
+                <label>Logged in as:</label>
+                <p id="userName">-</p>
+            </div>
+
+            <div class="token-display">
+                <label>Bearer Token:</label>
+                <div class="token-text" id="tokenText">Loading...</div>
+                <button class="copy-btn" onclick="copyToken()">Copy Token</button>
+            </div>
+
+            <!-- Test API Section -->
+            <div class="test-section active">
+                <h3>Test API</h3>
+                <input type="text" class="test-input" id="entityName" placeholder="Enter entity name (e.g., accounts)"
+                    value="accounts" />
+                <input type="text" class="test-input" id="queryParams" placeholder="Query parameters (e.g., $top=10)"
+                    value="$top=10" />
+                <button class="test-btn" onclick="testAPI()">Test Read API</button>
+                <div id="responseDiv"></div>
+            </div>
+
+            <!-- Load Test Section -->
+            <div class="loadtest-section active">
+                <h3>Load Test (Multi-thread)</h3>
+                <div class="form-group">
+                    <label>Target URL (any API):</label>
+                    <input type="text" id="loadtestUrl" placeholder="e.g., /api/d365/records/accounts or /api/loadtest/health" value="/api/loadtest/health" />
+                </div>
+                <div class="form-group">
+                    <label>HTTP Method:</label>
+                    <select id="loadtestMethod">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Bearer Token (optional):</label>
+                    <input type="text" id="loadtestToken" placeholder="Paste your bearer token here (will be added to Authorization header)" />
+                    <small style="color: #999; display: block; margin-top: 5px;">
+                        <button type="button" onclick="loadtestUseCurrentToken()" style="background: #667eea; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 12px;">Use Current Token</button>
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>Number of Threads:</label>
+                    <input type="number" id="loadtestThreads" value="100" min="1" max="10000" />
+                </div>
+                <div class="form-group">
+                    <label>Requests per Thread:</label>
+                    <input type="number" id="loadtestRequestsPerThread" value="10" min="1" max="1000" />
+                </div>
+                <div class="form-group">
+                    <label>Timeout (ms):</label>
+                    <input type="number" id="loadtestTimeout" value="30000" min="1000" />
+                </div>
+                
+                <div id="loadtestProgress" style="display: none;">
+                    <p id="loadtestStatus">Starting load test...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div class="loadtest-controls">
+                    <button class="loadtest-btn" id="loadtestRunBtn" onclick="runLoadTest()">Run Load Test</button>
+                    <button class="loadtest-btn secondary" onclick="clearLoadTestResult()">Clear</button>
+                </div>
+                <div id="loadtestResultDiv"></div>
+            </div>
+
+            <!-- Multi-User Load Test Section -->
+            <div class="loadtest-section active">
+                <h3>Multi-User Load Test (16K+ Users)</h3>
+                <div class="form-group">
+                    <label>Target URL (any API):</label>
+                    <input type="text" id="multiUserUrl" placeholder="e.g., /api/d365/records/accounts or /api/loadtest/health" value="/api/loadtest/health" />
+                </div>
+                <div class="form-group">
+                    <label>HTTP Method:</label>
+                    <select id="multiUserMethod">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Number of Users:</label>
+                    <input type="number" id="multiUserNumUsers" value="100" min="1" max="100000" />
+                </div>
+                <div class="form-group">
+                    <label>Requests per User:</label>
+                    <input type="number" id="multiUserRequestsPerUser" value="100" min="1" max="100000" />
+                </div>
+                <div class="form-group">
+                    <label>Available User Tokens:</label>
+                    <div id="userTokensList" style="border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-top: 5px; background: #fafafa; min-height: 40px;">
+                        <span style="color: #999; font-size: 13px;">No users logged in. Login to add tokens.</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Timeout (ms):</label>
+                    <input type="number" id="multiUserTimeout" value="30000" min="1000" />
+                </div>
+
+                <div id="multiUserProgress" style="display: none;">
+                    <p id="multiUserStatus">Starting multi-user load test...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="multiUserProgressFill"></div>
+                    </div>
+                </div>
+
+                <div class="loadtest-controls">
+                    <button class="loadtest-btn" id="multiUserRunBtn" onclick="runMultiUserLoadTest()">Run Multi-User Test</button>
+                    <button class="loadtest-btn secondary" onclick="clearMultiUserResult()">Clear</button>
+                </div>
+                <div id="multiUserResultDiv"></div>
+            </div>
+
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        // These will be fetched from backend config
+        let CLIENT_ID = '';
+        let TENANT_ID = '';
+        let API_APP_ID = '';
+        const REDIRECT_URI = `https://361cs493-3000.asse.devtunnels.ms`;
+
+        // Fetch config from backend and wait for it
+        async function loadConfig() {
+            try {
+                const res = await fetch('/api/auth/config');
+                const data = await res.json();
+                CLIENT_ID = data.clientId;
+                TENANT_ID = data.tenantId;
+                API_APP_ID = data.apiAppId;
+                console.log('Config loaded:', { TENANT_ID, CLIENT_ID, API_APP_ID });
+            } catch (err) {
+                console.error('Failed to load config:', err);
+            }
+        }
+
+        // Load config when page starts
+        loadConfig();
+
+        // Check if we're on the callback page
+        function handleAuthCallback() {
+            try {
+                const params = new URLSearchParams(window.location.hash.substring(1));
+                //const idToken = params.get('id_token');
+                const token = params.get('access_token');
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                console.log('Access Token Payload:', payload);
+                console.log('Audience:', payload.aud);
+                if (token) {
+                    // Store the token
+                    localStorage.setItem('userToken', token);
+
+                    // Get user info and update UI
+                    fetch('/api/auth/user-info', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.name) {
+                                localStorage.setItem('userName', data.name);
+                            }
+                            updateUI();
+                            // Clear hash from URL
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                        })
+                        .catch(err => {
+                            console.error('Failed to get user info:', err);
+                            updateUI();
+                            // Clear hash from URL
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                        });
+                }
+            } catch (err) {
+                console.error('Error in handleAuthCallback:', err);
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            handleAuthCallback();
+            updateUI();
+        });
+
+        async function loginWithMicrosoft() {
+            if (!TENANT_ID || !CLIENT_ID || !API_APP_ID) {
+                alert('Configuration not loaded. Please refresh the page.');
+                return;
+            }
+
+            const scope = `openid profile email api://${API_APP_ID}/.default`;
+            const loginUrl = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/authorize?` +
+                `client_id=${CLIENT_ID}` +
+                `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+                `&response_type=id_token+token` +
+                `&scope=${encodeURIComponent(scope)}` +
+                `&nonce=${generateNonce()}` +
+                `&response_mode=fragment`;
+
+            console.log('Opening login in new tab:', loginUrl);
+            window.open(loginUrl, '_blank');
+        }
+
+        function generateNonce() {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        }
+
+        function updateUI() {
+            const token = localStorage.getItem('userToken');
+            const userName = localStorage.getItem('userName');
+
+            if (token) {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('tokenSection').classList.add('active');
+                document.getElementById('tokenText').textContent = token;
+                document.getElementById('userName').textContent = userName || 'User';
+                
+                // Auto-add token to multi-user test pool
+                if (!userTokenStorage.includes(token)) {
+                    userTokenStorage.push(token);
+                    updateUserTokensList();
+                }
+            } else {
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('tokenSection').classList.remove('active');
+            }
+        }
+
+        function copyToken() {
+            const token = document.getElementById('tokenText').textContent;
+            navigator.clipboard.writeText(token).then(() => {
+                alert('Token copied to clipboard!');
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userName');
+            updateUI();
+        }
+
+        function testAPI() {
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                alert('Please login first');
+                return;
+            }
+
+            const entityName = document.getElementById('entityName').value;
+            const queryParams = document.getElementById('queryParams').value;
+
+            if (!entityName) {
+                alert('Please enter entity name');
+                return;
+            }
+
+            const responseDiv = document.getElementById('responseDiv');
+            responseDiv.innerHTML = '<div class="response"><span class="spinner"></span> Testing API...</div>';
+
+            let url = `/api/d365/records/${entityName}`;
+            if (queryParams) {
+                url += `?query=${encodeURIComponent(queryParams)}`;
+            }
+
+            fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    responseDiv.innerHTML = `<div class="response"><span class="success">✓ Success</span>\n${JSON.stringify(data, null, 2)}</div>`;
+                })
+                .catch(err => {
+                    responseDiv.innerHTML = `<div class="response"><span class="error">✗ Error</span>\n${err.message}</div>`;
+                });
+        }
+
+        async function runLoadTest() {
+            const url = document.getElementById('loadtestUrl').value;
+            const method = document.getElementById('loadtestMethod').value;
+            const numThreads = parseInt(document.getElementById('loadtestThreads').value);
+            const requestsPerThread = parseInt(document.getElementById('loadtestRequestsPerThread').value);
+            const timeout = parseInt(document.getElementById('loadtestTimeout').value);
+            const bearerToken = document.getElementById('loadtestToken').value;
+
+            if (!url) {
+                alert('Please enter target URL');
+                return;
+            }
+
+            if (numThreads > 10000) {
+                alert('Maximum threads is 10000');
+                return;
+            }
+
+            const runBtn = document.getElementById('loadtestRunBtn');
+            runBtn.disabled = true;
+            runBtn.textContent = 'Running...';
+
+            const progressDiv = document.getElementById('loadtestProgress');
+            progressDiv.style.display = 'block';
+
+            const resultDiv = document.getElementById('loadtestResultDiv');
+            resultDiv.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/loadtest/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url,
+                        method,
+                        numThreads,
+                        requestsPerThread,
+                        timeout,
+                        bearerToken: bearerToken || undefined
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || `HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                const result = data.data;
+                const formatted = data.formatted;
+
+                displayDetailedLoadTestResult(result);
+                progressDiv.style.display = 'none';
+            } catch (err) {
+                const errorMsg = err instanceof Error ? err.message : String(err);
+                resultDiv.innerHTML = `<div class="response"><span class="error">✗ Error</span>\n${errorMsg}</div>`;
+                progressDiv.style.display = 'none';
+                
+                // Create partial result object for CSV export on error
+                if (!currentLoadTestResult) {
+                    currentLoadTestResult = {
+                        url: url,
+                        method: method,
+                        totalRequests: 0,
+                        successCount: 0,
+                        failureCount: 0,
+                        totalTime: 0,
+                        avgResponseTime: 0,
+                        minResponseTime: 0,
+                        maxResponseTime: 0,
+                        requestsPerSecond: 0,
+                        errors: [{ thread: 0, error: errorMsg }],
+                        requestDetails: [],
+                    };
+                }
+                
+                // Add export button for error case
+                const exportBtn = document.createElement('button');
+                exportBtn.className = 'export-btn';
+                exportBtn.textContent = '📥 Export CSV';
+                exportBtn.onclick = exportLoadTestCSV;
+                const btnContainer = document.createElement('div');
+                btnContainer.style.marginTop = '15px';
+                btnContainer.appendChild(exportBtn);
+                resultDiv.appendChild(btnContainer);
+            } finally {
+                runBtn.disabled = false;
+                runBtn.textContent = 'Run Load Test';
+            }
+        }
+
+        function clearLoadTestResult() {
+            document.getElementById('loadtestResultDiv').innerHTML = '';
+            document.getElementById('loadtestProgress').style.display = 'none';
+        }
+
+        function loadtestUseCurrentToken() {
+            const currentToken = localStorage.getItem('userToken');
+            if (!currentToken) {
+                alert('No current token. Please login first.');
+                return;
+            }
+            document.getElementById('loadtestToken').value = currentToken;
+            alert('Current token loaded into Bearer Token field');
+        }
+
+        // Multi-User Load Test Functions
+        let userTokenStorage = []; // Store all user tokens
+
+        function addUserToken() {
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                alert('Please login first');
+                return;
+            }
+
+            // Check if token already exists
+            if (!userTokenStorage.includes(token)) {
+                userTokenStorage.push(token);
+                updateUserTokensList();
+                alert('User token added to pool!');
+            } else {
+                alert('This token is already in the pool');
+            }
+        }
+
+        function updateUserTokensList() {
+            const listDiv = document.getElementById('userTokensList');
+            if (userTokenStorage.length === 0) {
+                listDiv.innerHTML = '<span style="color: #999; font-size: 13px;">No users logged in. Login to add tokens.</span>';
+            } else {
+                const tokensList = userTokenStorage.map((token, i) => {
+                    const shortToken = token.substring(0, 20) + '...' + token.substring(token.length - 10);
+                    return `<div style="padding: 5px; background: white; margin: 3px 0; border-radius: 3px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>User ${i + 1}: ${shortToken}</span>
+                        <button onclick="removeUserToken(${i})" style="background: #dc3545; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">Remove</button>
+                    </div>`;
+                }).join('');
+                listDiv.innerHTML = tokensList;
+            }
+        }
+
+        function removeUserToken(index) {
+            userTokenStorage.splice(index, 1);
+            updateUserTokensList();
+        }
+
+        // When user logs in, automatically add their token
+        function loginSuccessful() {
+            const token = localStorage.getItem('userToken');
+            if (token && !userTokenStorage.includes(token)) {
+                userTokenStorage.push(token);
+                updateUserTokensList();
+            }
+        }
+
+        async function runMultiUserLoadTest() {
+            const url = document.getElementById('multiUserUrl').value;
+            const method = document.getElementById('multiUserMethod').value;
+            const numUsers = parseInt(document.getElementById('multiUserNumUsers').value);
+            const requestsPerUser = parseInt(document.getElementById('multiUserRequestsPerUser').value);
+            const timeout = parseInt(document.getElementById('multiUserTimeout').value);
+
+            if (!url) {
+                alert('Please enter target URL');
+                return;
+            }
+
+            if (numUsers > 100000) {
+                alert('Maximum users is 100000');
+                return;
+            }
+
+            if (requestsPerUser > 100000) {
+                alert('Maximum requests per user is 100000');
+                return;
+            }
+
+            if (userTokenStorage.length === 0) {
+                const useEmptyTokens = confirm('No user tokens available. Continue without authentication?');
+                if (!useEmptyTokens) {
+                    alert('Please login and add at least one user token');
+                    return;
+                }
+            }
+
+            const runBtn = document.getElementById('multiUserRunBtn');
+            runBtn.disabled = true;
+            runBtn.textContent = 'Running...';
+
+            const progressDiv = document.getElementById('multiUserProgress');
+            progressDiv.style.display = 'block';
+
+            const resultDiv = document.getElementById('multiUserResultDiv');
+            resultDiv.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/loadtest/multi-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url,
+                        method,
+                        numUsers,
+                        requestsPerUser,
+                        timeout,
+                        userTokens: userTokenStorage,
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || `HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                const result = data.data;
+                const formatted = data.formatted;
+
+                displayDetailedMultiUserResult(result);
+                progressDiv.style.display = 'none';
+            } catch (err) {
+                const errorMsg = err instanceof Error ? err.message : String(err);
+                resultDiv.innerHTML = `<div class="response"><span class="error">✗ Error</span>\n${errorMsg}</div>`;
+                progressDiv.style.display = 'none';
+                
+                // Create partial result object for CSV export on error
+                if (!currentMultiUserResult) {
+                    currentMultiUserResult = {
+                        url: url,
+                        method: method,
+                        numUsers: numUsers,
+                        totalUsers: numUsers,
+                        totalRequests: 0,
+                        successCount: 0,
+                        failureCount: 0,
+                        successRate: 0,
+                        totalTime: 0,
+                        avgResponseTime: 0,
+                        minResponseTime: 0,
+                        maxResponseTime: 0,
+                        requestsPerSecond: 0,
+                        errors: [{ user: 0, requestNum: 0, error: errorMsg }],
+                        requestDetails: [],
+                        userStats: [],
+                    };
+                }
+                
+                // Add export button for error case
+                const exportBtn = document.createElement('button');
+                exportBtn.className = 'export-btn';
+                exportBtn.textContent = '📥 Export CSV';
+                exportBtn.onclick = exportMultiUserCSV;
+                const btnContainer = document.createElement('div');
+                btnContainer.style.marginTop = '15px';
+                btnContainer.appendChild(exportBtn);
+                resultDiv.appendChild(btnContainer);
+            } finally {
+                runBtn.disabled = false;
+                runBtn.textContent = 'Run Multi-User Test';
+            }
+        }
+
+        function clearMultiUserResult() {
+            document.getElementById('multiUserResultDiv').innerHTML = '';
+            document.getElementById('multiUserProgress').style.display = 'none';
+        }
+
+        // Detailed Result Display Functions
+        let currentLoadTestResult = null;
+        let currentMultiUserResult = null;
+
+        function displayDetailedLoadTestResult(result) {
+            currentLoadTestResult = result;
+            const resultDiv = document.getElementById('loadtestResultDiv');
+            
+            const summaryHtml = `
+                <div class="result-tabs">
+                    <button class="result-tab-btn active" onclick="switchTab('loadtest', 'summary')">Summary</button>
+                    <button class="result-tab-btn" onclick="switchTab('loadtest', 'requests')">Request Log</button>
+                    <button class="result-tab-btn" onclick="switchTab('loadtest', 'errors')">Errors</button>
+                </div>
+
+                <div id="loadtest-summary" class="result-tab-content active">
+                    <div class="export-controls">
+                        <button class="export-btn" onclick="exportLoadTestCSV()">📥 Export CSV</button>
+                        <button class="export-btn copy" onclick="copyLoadTestResults()">📋 Copy</button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Total Requests</div>
+                            <div class="stat-value">${result.totalRequests.toLocaleString()}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Success Rate</div>
+                            <div class="stat-value">${((result.successCount / result.totalRequests) * 100).toFixed(2)}<span class="stat-unit">%</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Success</div>
+                            <div class="stat-value">${result.successCount.toLocaleString()}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Failures</div>
+                            <div class="stat-value">${result.failureCount.toLocaleString()}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Total Time</div>
+                            <div class="stat-value">${result.totalTime.toLocaleString()}<span class="stat-unit">ms</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Avg Response Time</div>
+                            <div class="stat-value">${result.avgResponseTime.toFixed(2)}<span class="stat-unit">ms</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Min Response Time</div>
+                            <div class="stat-value">${result.minResponseTime.toFixed(2)}<span class="stat-unit">ms</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Max Response Time</div>
+                            <div class="stat-value">${result.maxResponseTime.toFixed(2)}<span class="stat-unit">ms</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Requests/Second</div>
+                            <div class="stat-value">${result.requestsPerSecond.toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="loadtest-requests" class="result-tab-content">
+                    <div class="request-log">
+                        <div class="request-log-header">
+                            <h4>Detailed Request Log</h4>
+                            <div class="log-filter">
+                                <button class="active" onclick="filterLoadTestRequests('all')">All (${result.totalRequests})</button>
+                                <button onclick="filterLoadTestRequests('success')">✓ Success (${result.successCount})</button>
+                                <button onclick="filterLoadTestRequests('failed')">✗ Failed (${result.failureCount})</button>
+                            </div>
+                        </div>
+                        <div class="request-log-scroll" id="loadtest-request-list">
+                            ${generateRequestLogHTML(result.requestDetails, 'thread')}
+                        </div>
+                    </div>
+                </div>
+
+                <div id="loadtest-errors" class="result-tab-content">
+                    ${result.errors && result.errors.length > 0 ? `
+                        <div class="table-container">
+                            <table class="result-table">
+                                <thead>
+                                    <tr>
+                                        <th>Thread</th>
+                                        <th>Error</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${result.errors.slice(0, 100).map((e, i) => `
+                                        <tr>
+                                            <td>${e.thread}</td>
+                                            <td>${e.error}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p style="color: #999; font-size: 12px; margin-top: 10px;">Showing first 100 errors of ${result.errors.length}</p>
+                    ` : '<p style="color: #28a745;">✓ No errors</p>'}
+                </div>
+            `;
+            
+            resultDiv.innerHTML = summaryHtml;
+        }
+
+        function displayDetailedMultiUserResult(result) {
+            currentMultiUserResult = result;
+            const resultDiv = document.getElementById('multiUserResultDiv');
+            
+            const summaryHtml = `
+                <div class="result-tabs">
+                    <button class="result-tab-btn active" onclick="switchTab('multiuser', 'summary')">Summary</button>
+                    <button class="result-tab-btn" onclick="switchTab('multiuser', 'requests')">Request Log</button>
+                    <button class="result-tab-btn" onclick="switchTab('multiuser', 'users')">Per-User Stats</button>
+                    <button class="result-tab-btn" onclick="switchTab('multiuser', 'errors')">Errors</button>
+                </div>
+
+                <div id="multiuser-summary" class="result-tab-content active">
+                    <div class="export-controls">
+                        <button class="export-btn" onclick="exportMultiUserCSV()">📥 Export CSV</button>
+                        <button class="export-btn copy" onclick="copyMultiUserResults()">📋 Copy</button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Total Users</div>
+                            <div class="stat-value">${result.totalUsers.toLocaleString()}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Total Requests</div>
+                            <div class="stat-value">${result.totalRequests.toLocaleString()}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Success</div>
+                            <div class="stat-value">${result.successCount.toLocaleString()}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Failures</div>
+                            <div class="stat-value">${result.failureCount.toLocaleString()}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Success Rate</div>
+                            <div class="stat-value">${result.successRate.toFixed(2)}<span class="stat-unit">%</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Avg Response Time</div>
+                            <div class="stat-value">${result.avgResponseTime.toFixed(2)}<span class="stat-unit">ms</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Min Response Time</div>
+                            <div class="stat-value">${result.minResponseTime.toFixed(2)}<span class="stat-unit">ms</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Max Response Time</div>
+                            <div class="stat-value">${result.maxResponseTime.toFixed(2)}<span class="stat-unit">ms</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Total Time</div>
+                            <div class="stat-value">${result.totalTime.toLocaleString()}<span class="stat-unit">ms</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Requests/Second</div>
+                            <div class="stat-value">${result.requestsPerSecond.toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="multiuser-requests" class="result-tab-content">
+                    <div class="request-log">
+                        <div class="request-log-header">
+                            <h4>Detailed Request Log</h4>
+                            <div class="log-filter">
+                                <button class="active" onclick="filterMultiUserRequests('all')">All (${result.totalRequests})</button>
+                                <button onclick="filterMultiUserRequests('success')">✓ Success (${result.successCount})</button>
+                                <button onclick="filterMultiUserRequests('failed')">✗ Failed (${result.failureCount})</button>
+                            </div>
+                        </div>
+                        <div class="request-log-scroll" id="multiuser-request-list">
+                            ${generateRequestLogHTML(result.requestDetails, 'user')}
+                        </div>
+                    </div>
+                </div>
+
+                <div id="multiuser-users" class="result-tab-content">
+                    ${result.userStats && result.userStats.length > 0 ? `
+                        <div class="table-container">
+                            <table class="result-table">
+                                <thead>
+                                    <tr>
+                                        <th>User ID</th>
+                                        <th>Success</th>
+                                        <th>Failed</th>
+                                        <th>Avg Response Time (ms)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${result.userStats.map(stat => `
+                                        <tr>
+                                            <td>${stat.user}</td>
+                                            <td>${stat.success}</td>
+                                            <td>${stat.failed}</td>
+                                            <td>${stat.avgTime.toFixed(2)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    ` : '<p>No user stats</p>'}
+                </div>
+
+                <div id="multiuser-errors" class="result-tab-content">
+                    ${result.errors && result.errors.length > 0 ? `
+                        <div class="table-container">
+                            <table class="result-table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Request #</th>
+                                        <th>Error</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${result.errors.slice(0, 100).map((e, i) => `
+                                        <tr>
+                                            <td>${e.user}</td>
+                                            <td>${e.requestNum}</td>
+                                            <td>${e.error}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p style="color: #999; font-size: 12px; margin-top: 10px;">Showing first 100 errors of ${result.errors.length}</p>
+                    ` : '<p style="color: #28a745;">✓ No errors</p>'}
+                </div>
+            `;
+            
+            resultDiv.innerHTML = summaryHtml;
+        }
+
+        function switchTab(type, tab) {
+            // Hide all tabs
+            const prefix = type === 'loadtest' ? 'loadtest' : 'multiuser';
+            document.querySelectorAll(`#${prefix}-summary, #${prefix}-errors, #${prefix}-users`).forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Remove active from all buttons
+            document.querySelectorAll(`.result-tabs .result-tab-btn`).forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            const tabEl = document.getElementById(`${prefix}-${tab}`);
+            if (tabEl) {
+                tabEl.classList.add('active');
+            }
+            
+            // Mark button as active
+            event.target.classList.add('active');
+        }
+
+        function exportLoadTestCSV() {
+            if (!currentLoadTestResult) {
+                alert('No results to export');
+                return;
+            }
+            
+            const csv = generateLoadTestCSV(currentLoadTestResult);
+            downloadCSV(csv, 'load-test-results.csv');
+        }
+
+        function exportMultiUserCSV() {
+            if (!currentMultiUserResult) {
+                alert('No results to export');
+                return;
+            }
+            
+            const csv = generateMultiUserCSV(currentMultiUserResult);
+            downloadCSV(csv, 'multi-user-load-test-results.csv');
+        }
+
+        function generateLoadTestCSV(result) {
+            const lines = [];
+            lines.push("LOAD TEST RESULTS");
+            lines.push("");
+            lines.push("TEST INFORMATION");
+            lines.push("Field,Value");
+            lines.push(`API Endpoint,"${result.url || 'N/A'}"`);
+            lines.push(`HTTP Method,${result.method || 'GET'}`);
+            lines.push(`Test Date,${new Date().toLocaleString('en-US', { hour12: false })}`);
+            lines.push("");
+            
+            lines.push("SUMMARY");
+            lines.push("Metric,Value");
+            lines.push(`Total Requests,${result.totalRequests}`);
+            lines.push(`Success,${result.successCount}`);
+            lines.push(`Failures,${result.failureCount}`);
+            lines.push(`Success Rate (%),${((result.successCount / result.totalRequests) * 100).toFixed(2)}`);
+            lines.push(`Total Time (ms),${result.totalTime}`);
+            lines.push(`Avg Response Time (ms),${result.avgResponseTime.toFixed(2)}`);
+            lines.push(`Min Response Time (ms),${result.minResponseTime.toFixed(2)}`);
+            lines.push(`Max Response Time (ms),${result.maxResponseTime.toFixed(2)}`);
+            lines.push(`Requests/Second,${result.requestsPerSecond.toFixed(2)}`);
+            lines.push("");
+            
+            // Add detailed request log sorted by threadId and requestNum
+            if (result.requestDetails && result.requestDetails.length > 0) {
+                lines.push("DETAILED REQUEST LOG");
+                lines.push("Thread,Request #,Start Time,End Time,Duration (ms),HTTP Status,Result,Error");
+                
+                // Sort by threadId first, then requestNum
+                const sorted = [...result.requestDetails].sort((a, b) => {
+                    if (a.threadId !== b.threadId) return a.threadId - b.threadId;
+                    return a.requestNum - b.requestNum;
+                });
+                
+                sorted.forEach(req => {
+                    const startDate = new Date(req.startTime).toLocaleString('en-US', { hour12: false });
+                    const endDate = new Date(req.endTime).toLocaleString('en-US', { hour12: false });
+                    const result = req.success ? 'PASS' : 'FAIL';
+                    const status = req.status || 'N/A';
+                    const error = req.error ? `"${req.error.replace(/"/g, '""')}"` : '';
+                    
+                    lines.push(`${req.threadId},${req.requestNum},"${startDate}","${endDate}",${req.duration},${status},${result},${error}`);
+                });
+                lines.push("");
+            }
+            
+            if (result.errors && result.errors.length > 0) {
+                lines.push("ERRORS SUMMARY");
+                lines.push("Thread,Error");
+                result.errors.forEach(error => {
+                    lines.push(`${error.thread},"${error.error.replace(/"/g, '""')}"`);
+                });
+            }
+            
+            return lines.join("\n");
+        }
+
+        function generateMultiUserCSV(result) {
+            const lines = [];
+            lines.push("MULTI-USER LOAD TEST RESULTS");
+            lines.push("");
+            lines.push("TEST INFORMATION");
+            lines.push("Field,Value");
+            lines.push(`API Endpoint,"${result.url || 'N/A'}"`);
+            lines.push(`HTTP Method,${result.method || 'GET'}`);
+            lines.push(`Number of Users,${result.numUsers || result.totalUsers}`);
+            lines.push(`Test Date,${new Date().toLocaleString('en-US', { hour12: false })}`);
+            lines.push("");
+            
+            lines.push("SUMMARY");
+            lines.push("Metric,Value");
+            lines.push(`Total Users,${result.totalUsers}`);
+            lines.push(`Total Requests,${result.totalRequests}`);
+            lines.push(`Success,${result.successCount}`);
+            lines.push(`Failures,${result.failureCount}`);
+            lines.push(`Success Rate (%),${result.successRate.toFixed(2)}`);
+            lines.push(`Total Time (ms),${result.totalTime}`);
+            lines.push(`Avg Response Time (ms),${result.avgResponseTime.toFixed(2)}`);
+            lines.push(`Min Response Time (ms),${result.minResponseTime.toFixed(2)}`);
+            lines.push(`Max Response Time (ms),${result.maxResponseTime.toFixed(2)}`);
+            lines.push(`Requests/Second,${result.requestsPerSecond.toFixed(2)}`);
+            lines.push("");
+            
+            // Add detailed request log sorted by userId and requestNum
+            if (result.requestDetails && result.requestDetails.length > 0) {
+                lines.push("DETAILED REQUEST LOG");
+                lines.push("User ID,Request #,Start Time,End Time,Duration (ms),HTTP Status,Result,Error");
+                
+                // Sort by userId first, then requestNum
+                const sorted = [...result.requestDetails].sort((a, b) => {
+                    if (a.userId !== b.userId) return a.userId - b.userId;
+                    return a.requestNum - b.requestNum;
+                });
+                
+                sorted.forEach(req => {
+                    const startDate = new Date(req.startTime).toLocaleString('en-US', { hour12: false });
+                    const endDate = new Date(req.endTime).toLocaleString('en-US', { hour12: false });
+                    const result = req.success ? 'PASS' : 'FAIL';
+                    const status = req.status || 'N/A';
+                    const error = req.error ? `"${req.error.replace(/"/g, '""')}"` : '';
+                    
+                    lines.push(`${req.userId},${req.requestNum},"${startDate}","${endDate}",${req.duration},${status},${result},${error}`);
+                });
+                lines.push("");
+            }
+            
+            if (result.userStats && result.userStats.length > 0) {
+                lines.push("PER-USER STATISTICS");
+                lines.push("User ID,Success Count,Failed Count,Avg Response Time (ms)");
+                result.userStats.forEach(stat => {
+                    lines.push(`${stat.user},${stat.success},${stat.failed},${stat.avgTime.toFixed(2)}`);
+                });
+                lines.push("");
+            }
+            
+            if (result.errors && result.errors.length > 0) {
+                lines.push("ERRORS SUMMARY");
+                lines.push("User,Request #,Error");
+                result.errors.forEach(error => {
+                    lines.push(`${error.user},${error.requestNum},"${error.error.replace(/"/g, '""')}"`);
+                });
+            }
+            
+            return lines.join("\n");
+        }
+
+        function downloadCSV(csv, filename) {
+            const element = document.createElement("a");
+            element.setAttribute("href", "data:text/csv;charset=utf-8," + encodeURIComponent(csv));
+            element.setAttribute("download", filename);
+            element.style.display = "none";
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function copyLoadTestResults() {
+            if (!currentLoadTestResult) {
+                alert('No results to copy');
+                return;
+            }
+            const csv = generateLoadTestCSV(currentLoadTestResult);
+            navigator.clipboard.writeText(csv).then(() => {
+                alert('Results copied to clipboard!');
+            });
+        }
+
+        function copyMultiUserResults() {
+            if (!currentMultiUserResult) {
+                alert('No results to copy');
+                return;
+            }
+            const csv = generateMultiUserCSV(currentMultiUserResult);
+            navigator.clipboard.writeText(csv).then(() => {
+                alert('Results copied to clipboard!');
+            });
+        }
+
+        // Request Log Functions
+        let currentRequestFilterType = 'all';
+        let currentRequestLogType = 'thread'; // 'thread' or 'user'
+
+        function generateRequestLogHTML(requestDetails, type) {
+            const filtered = requestDetails.filter(req => {
+                if (currentRequestFilterType === 'success') return req.success;
+                if (currentRequestFilterType === 'failed') return !req.success;
+                return true;
+            });
+
+            return filtered
+                .slice(-500) // Show last 500 requests for performance
+                .map(req => {
+                    const colName = type === 'thread' ? 'threadId' : 'userId';
+                    const idLabel = type === 'thread' ? 'Thread' : 'User';
+                    const statusClass = req.success ? 'success' : 'failed';
+                    const statusText = req.success ? '✓ PASS' : '✗ FAIL';
+                    const startDate = new Date(req.startTime).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
+                    const endDate = new Date(req.endTime).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
+                    
+                    return `
+                        <div class="request-row ${statusClass}">
+                            <div class="request-col" style="flex: 0.5;">
+                                <div class="request-col-label">${idLabel}</div>
+                                <div class="request-col-value">${req[colName]}</div>
+                            </div>
+                            <div class="request-col" style="flex: 0.5;">
+                                <div class="request-col-label">Req #</div>
+                                <div class="request-col-value">${req.requestNum}</div>
+                            </div>
+                            <div class="request-col" style="flex: 1;">
+                                <div class="request-col-label">Start Time</div>
+                                <div class="request-col-value">${startDate}</div>
+                            </div>
+                            <div class="request-col" style="flex: 1;">
+                                <div class="request-col-label">End Time</div>
+                                <div class="request-col-value">${endDate}</div>
+                            </div>
+                            <div class="request-col" style="flex: 0.7;">
+                                <div class="request-col-label">Duration</div>
+                                <div class="request-col-value">${req.duration}ms</div>
+                            </div>
+                            <div class="request-col" style="flex: 0.5;">
+                                <div class="request-col-label">Status</div>
+                                <div class="request-col-value">${req.status || 'N/A'}</div>
+                            </div>
+                            <div class="request-col" style="flex: 1;">
+                                <div class="request-col-label">Result</div>
+                                <div><span class="request-status ${statusClass}">${statusText}</span></div>
+                            </div>
+                            ${req.error ? `
+                            <div class="request-col" style="flex: 1.5;">
+                                <div class="request-col-label">Error</div>
+                                <div class="request-col-value" style="color: #dc3545; word-break: break-word;">${req.error}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                })
+                .join('');
+        }
+
+        function filterLoadTestRequests(type) {
+            currentRequestFilterType = type;
+            
+            // Update button states
+            document.querySelectorAll('.log-filter button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update display
+            const result = currentLoadTestResult;
+            const logList = document.getElementById('loadtest-request-list');
+            if (logList) {
+                logList.innerHTML = generateRequestLogHTML(result.requestDetails, 'thread');
+            }
+        }
+
+        function filterMultiUserRequests(type) {
+            currentRequestFilterType = type;
+            
+            // Update button states
+            document.querySelectorAll('.log-filter button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update display
+            const result = currentMultiUserResult;
+            const logList = document.getElementById('multiuser-request-list');
+            if (logList) {
+                logList.innerHTML = generateRequestLogHTML(result.requestDetails, 'user');
+            }
+        }
+    </script>
+</body>
+
+</html>
